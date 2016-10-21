@@ -17,17 +17,24 @@ cat <<EOF
 
 EOF
 
-if [ -z ${VIRTUAL_ENV+x} ]; then echo "virtualenv not activate please activate it first !" && exit 1; fi
+if [ -z ${VIRTUAL_ENV+x} ]; then echo "$RED virtualenv not activate please activate it first ! $NORMAL" && exit 1; fi
 
 CURRENT_PATH="$PWD"
 APP_NAME=$(basename $VIRTUAL_ENV)
 SETTINGS_PATH="$CURRENT_PATH/$APP_NAME/settings/dev.py"
 
+# Fancy things
+NORMAL=$(tput sgr0)
+GREEN=$(tput setaf 2; tput bold)
+YELLOW=$(tput setaf 3)
+RED=$(tput setaf 1)
+
+# Functions 
 editVenvPostScripts() {
-    read -p "Would you like to edit venv scripts ? [y/n] : " ANSWER
+    read -p "Would you like to edit venv scripts ? $YELLOW [y/n] $NORMAL : " ANSWER
     case $ANSWER in
             [yY]* )
-                if [ -z ${EDITOR+x} ]; then echo "Please set EDITOR env var before trying to edit files!"&& exit; fi
+                if [ -z ${EDITOR+x} ]; then echo "Please set $RED EDITOR $NORMAL env var before trying to edit files!"&& exit; fi
                 $EDITOR $VIRTUAL_ENV/bin/postactivate $VIRTUAL_ENV/bin/postdeactivate;;
             [nN]* )
                exit;;
@@ -44,23 +51,25 @@ addVenvPostScripts() {
 
 getVenvDevSettingsPath() {
     unset SETTINGS_PATH
-    read -p "Please provide fullpath to settings/dev.py ex : $CURRENT_PATH/$APP_NAME/settings/dev.settings.py : " SETTINGS_PATH
+    read -p "Please provide fullpath to settings/dev.py ex : $GREEN $CURRENT_PATH/$APP_NAME/settings/dev.settings.py $NORMAL: " SETTINGS_PATH
 
     if [ -z ${SETTINGS_PATH} ];then
-        echo "Cancel operation" 
+        echo "$RED"
+        echo "Process cancelled $NORMAL" 
         exit 1 
     fi
     
 }
 
 getSettings() {
-    SETTINGS=($(sed -nr "s/.*environ.get\('([^']+)', *['\"]([^'\"]+).*/\1=\2/p" $1)) 
+    SETTINGS=(DJANGO_SETTINGS_MODULE=$APP_NAME.settings.dev)
+    SETTINGS+=($(sed -nr "s/.*environ.get\('([^']+)', *['\"]([^'\"]+).*/\1=\2/p" $1)) 
 }
 
 processSettings() {
     for SETTING in "${SETTINGS[@]}";
     do
-        read -p "put '$SETTING' value in postactivate ? [y/n] : " ANSWER
+        read -p "put $GREEN'$SETTING'$NORMAL value in postactivate ? $YELLOW [y/n] $NORMAL : " ANSWER
 
         case $ANSWER in 
             [yY]* )
@@ -81,7 +90,7 @@ putSetting() {
 # Main stuff
 while true
 do
-  read -p "App settings path : $SETTINGS_PATH correct ? [y/n] : " ANSWER
+  read -p "App settings path : $GREEN $SETTINGS_PATH $NORMAL correct ? $YELLOW [y/n] $NORMAL : " ANSWER
   case $ANSWER in
    [yY]* )
            getSettings $SETTINGS_PATH
@@ -98,5 +107,4 @@ done
 
 processSettings
 editVenvPostScripts
-
 exit
