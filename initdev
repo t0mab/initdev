@@ -17,20 +17,18 @@ cat <<EOF
 
 EOF
 
-
-
 # Fancy things
 NORMAL=$(tput sgr0)
 GREEN=$(tput setaf 2; tput bold)
 YELLOW=$(tput setaf 3)
 RED=$(tput setaf 1)
 
+if [ -z ${VIRTUAL_ENV+x} ]; then echo "$RED Virtualenv not activated please activate it first ! $NORMAL" && exit 1; fi
+
 # Vars
 CURRENT_PATH="$PWD"
 APP_NAME=$(basename $VIRTUAL_ENV)
 SETTINGS_PATH="$CURRENT_PATH/$APP_NAME/settings/dev.py"
-
-if [ -z ${VIRTUAL_ENV+x} ]; then echo "$RED Virtualenv not activated please activate it first ! $NORMAL" && exit 1; fi
 
 # Functions
 editVenvPostScripts() {
