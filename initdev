@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 
 cat <<EOF
- 
-  ██          ██   ██        ██                 
- ░░          ░░   ░██       ░██                 
+
+  ██          ██   ██        ██
+ ░░          ░░   ░██       ░██
   ██ ███████  ██ ██████     ░██  █████  ██    ██
  ░██░░██░░░██░██░░░██░   ██████ ██░░░██░██   ░██
- ░██ ░██  ░██░██  ░██   ██░░░██░███████░░██ ░██ 
- ░██ ░██  ░██░██  ░██  ░██  ░██░██░░░░  ░░████  
- ░██ ███  ░██░██  ░░██ ░░██████░░██████  ░░██   
- ░░ ░░░   ░░ ░░    ░░   ░░░░░░  ░░░░░░    ░░    
+ ░██ ░██  ░██░██  ░██   ██░░░██░███████░░██ ░██
+ ░██ ░██  ░██░██  ░██  ░██  ░██░██░░░░  ░░████
+ ░██ ███  ░██░██  ░░██ ░░██████░░██████  ░░██
+ ░░ ░░░   ░░ ░░    ░░   ░░░░░░  ░░░░░░    ░░
 
  v0.1
 
@@ -17,9 +17,7 @@ cat <<EOF
 
 EOF
 
-CURRENT_PATH="$PWD"
-APP_NAME=$(basename $VIRTUAL_ENV)
-SETTINGS_PATH="$CURRENT_PATH/$APP_NAME/settings/dev.py"
+
 
 # Fancy things
 NORMAL=$(tput sgr0)
@@ -27,7 +25,14 @@ GREEN=$(tput setaf 2; tput bold)
 YELLOW=$(tput setaf 3)
 RED=$(tput setaf 1)
 
-# Functions 
+# Vars
+CURRENT_PATH="$PWD"
+APP_NAME=$(basename $VIRTUAL_ENV)
+SETTINGS_PATH="$CURRENT_PATH/$APP_NAME/settings/dev.py"
+
+if [ -z ${VIRTUAL_ENV+x} ]; then echo "$RED Virtualenv not activated please activate it first ! $NORMAL" && exit 1; fi
+
+# Functions
 editVenvPostScripts() {
     read -p "Would you like to edit venv scripts ? $YELLOW [y/n] $NORMAL : " ANSWER
     case $ANSWER in
@@ -52,14 +57,14 @@ getVenvDevSettingsPath() {
 
     if [ -z ${SETTINGS_PATH} ];then
         echo "$RED"
-        echo "Process cancelled $NORMAL" 
-        exit 1 
+        echo "Process cancelled $NORMAL"
+        exit 1
     fi
 }
 
 getSettings() {
     SETTINGS=(DJANGO_SETTINGS_MODULE=$APP_NAME.settings.dev)
-    SETTINGS+=($(sed -nr "s/.*environ.get\('([^']+)', *['\"]([^'\"]+).*/\1=\2/p" $1)) 
+    SETTINGS+=($(sed -nr "s/.*environ.get\('([^']+)', *['\"]([^'\"]+).*/\1=\2/p" $1))
 }
 
 processSettings() {
@@ -67,7 +72,7 @@ processSettings() {
     do
         read -p "put $GREEN'$SETTING'$NORMAL value in postactivate ? $YELLOW [y/n] $NORMAL : " ANSWER
 
-        case $ANSWER in 
+        case $ANSWER in
             [yY]* )
                 putSetting $SETTING;;
             [nN]* )
@@ -86,7 +91,6 @@ putSetting() {
 # Main stuff
 while true
 do
-    if [ -z ${VIRTUAL_ENV+x} ]; then echo "$RED Virtualenv not activated please activate it first ! $NORMAL" && exit 1; fi
   read -p "App settings path : $GREEN $SETTINGS_PATH $NORMAL correct ? $YELLOW [y/n] $NORMAL : " ANSWER
   case $ANSWER in
    [yY]* )
