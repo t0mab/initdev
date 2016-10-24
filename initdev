@@ -86,7 +86,7 @@ putSetting() {
 # Main stuff
 while true
 do
-  if [ -z ${VIRTUAL_ENV+x} ]; then echo "$RED virtualenv not activate please activate it first ! $NORMAL" && exit 1; fi
+    if [ -z ${VIRTUAL_ENV+x} ]; then echo "$RED Virtualenv not activated please activate it first ! $NORMAL" && exit 1; fi
   read -p "App settings path : $GREEN $SETTINGS_PATH $NORMAL correct ? $YELLOW [y/n] $NORMAL : " ANSWER
   case $ANSWER in
    [yY]* )
