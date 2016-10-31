@@ -12,6 +12,7 @@ Shell script used to populate dev stage settings for a python project using virt
   * You need dev settings files using syntax like this : 
   ```
   EVIL_PARAMETER = environ.get('EVIL', '666')
+  ```
 
 # Requirements
   * A brain
