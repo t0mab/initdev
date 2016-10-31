@@ -1,5 +1,4 @@
-#!/usr/bin/env bash
-
+#!/usr/bin/env sh
 cat <<EOF
 
   ██          ██   ██        ██
@@ -11,31 +10,58 @@ cat <<EOF
  ░██ ███  ░██░██  ░░██ ░░██████░░██████  ░░██
  ░░ ░░░   ░░ ░░    ░░   ░░░░░░  ░░░░░░    ░░
 
- v0.1
+ v0.2
 
  T0mab 2K16 DIP FTW !!!!!!
 
 EOF
 
 # Fancy things
-NORMAL=$(tput sgr0)
-GREEN=$(tput setaf 2; tput bold)
-YELLOW=$(tput setaf 3)
-RED=$(tput setaf 1)
 
-if [ -z ${VIRTUAL_ENV+x} ]; then echo "$RED Virtualenv not activated please activate it first ! $NORMAL" && exit 1; fi
+NORMAL= GREEN= YELLOW= RED=
 
-# Vars
-CURRENT_PATH="$PWD"
+test -t 1 && {
+    NORMAL=$(tput sgr0)
+    GREEN=$(tput setaf 2; tput bold)
+    YELLOW=$(tput setaf 3)
+    RED=$(tput setaf 1)
+}
+
+warn () {
+    local _r=$?
+    echo "$RED $* $NORMAL" >&2
+    return $_r
+}
+
+die () {
+    warn "$*"
+    exit
+}
+
+read_p () { # backward compatible equivalent of the bash read -p (prompt)
+    echo $1
+    read $2
+}
+
+[ -z ${VIRTUAL_ENV+x} ] &&
+    die "Virtualenv not activated please activate it first !"
+
+# Vars {{{
+CURRENT_PATH="$(pwd)"
 APP_NAME=$(basename $VIRTUAL_ENV)
 SETTINGS_PATH="$CURRENT_PATH/$APP_NAME/settings/dev.py"
 
-# Functions
+#  }}}
+
+# Functions {{{
 editVenvPostScripts() {
-    read -p "Would you like to edit venv scripts ? $YELLOW [y/n] $NORMAL : " ANSWER
+    read_p "Would you like to edit venv scripts ? $YELLOW [y/n] $NORMAL : " ANSWER
     case $ANSWER in
             [yY]* )
-                if [ -z ${EDITOR+x} ]; then echo "Please set $RED EDITOR $NORMAL env var before trying to edit files!"&& exit; fi
+                [ -z ${EDITOR+x} ] && {
+                    echo "Please set $RED EDITOR $NORMAL env var before trying to edit files!"
+                    exit
+                }
                 $EDITOR $VIRTUAL_ENV/bin/postactivate $VIRTUAL_ENV/bin/postdeactivate;;
             [nN]* )
                exit;;
@@ -51,7 +77,7 @@ addVenvPostScripts() {
 
 getVenvDevSettingsPath() {
     unset SETTINGS_PATH
-    read -p "Please provide fullpath to settings/dev.py ex : $GREEN $CURRENT_PATH/$APP_NAME/settings/dev.settings.py $NORMAL: " SETTINGS_PATH
+    read_p "Please provide fullpath to settings/dev.py ex : $GREEN $CURRENT_PATH/$APP_NAME/settings/dev.settings.py $NORMAL: " SETTINGS_PATH
 
     if [ -z ${SETTINGS_PATH} ];then
         echo "$RED"
@@ -68,7 +94,7 @@ getSettings() {
 processSettings() {
     for SETTING in "${SETTINGS[@]}";
     do
-        read -p "put $GREEN'$SETTING'$NORMAL value in postactivate ? $YELLOW [y/n] $NORMAL : " ANSWER
+        read_p "put $GREEN'$SETTING'$NORMAL value in postactivate ? $YELLOW [y/n] $NORMAL : " ANSWER
 
         case $ANSWER in
             [yY]* )
@@ -82,14 +108,16 @@ processSettings() {
 }
 
 putSetting() {
-    R=($(echo $1 | sed s/=/\\n/g))
-    addVenvPostScripts ${R[0]} ${R[1]]}
+    IFS== read key value <<< $1
+    addVenvPostScripts $key $value
 }
+
+# }}}
 
 # Main stuff
 while true
 do
-  read -p "App settings path : $GREEN $SETTINGS_PATH $NORMAL correct ? $YELLOW [y/n] $NORMAL : " ANSWER
+  read_p "App settings path : $GREEN $SETTINGS_PATH $NORMAL correct ? $YELLOW [y/n] $NORMAL : " ANSWER
   case $ANSWER in
    [yY]* )
            getSettings $SETTINGS_PATH
@@ -106,4 +134,3 @@ done
 
 processSettings
 editVenvPostScripts
-exit
